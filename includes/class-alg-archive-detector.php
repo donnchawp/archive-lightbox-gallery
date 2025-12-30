@@ -46,8 +46,9 @@ class ALG_Archive_Detector {
 		// Block theme filter - use pre_render_block to short-circuit.
 		add_filter( 'pre_render_block', array( $this, 'pre_render_block_filter' ), 10, 3 );
 
-		// Classic theme hooks registered after query is ready.
+		// Classic theme: use template_include to load our template.
 		add_action( 'template_redirect', array( $this, 'maybe_activate_gallery' ) );
+		add_filter( 'template_include', array( $this, 'maybe_load_gallery_template' ) );
 	}
 
 	/**
@@ -61,13 +62,31 @@ class ALG_Archive_Detector {
 		}
 
 		$this->init_renderer();
+	}
 
-		// Register hooks for classic themes.
-		add_filter( 'the_content', array( $this, 'filter_post_content' ), 1 );
-		add_filter( 'the_excerpt', array( $this, 'filter_post_content' ), 1 );
-		add_filter( 'post_class', array( $this, 'filter_post_class' ), 10, 3 );
-		add_action( 'wp_head', array( $this, 'output_inline_css' ), 100 );
-		add_action( 'wp_footer', array( $this, 'output_lightbox' ), 5 );
+	/**
+	 * Maybe load the gallery template for classic themes.
+	 *
+	 * @param string $template The current template path.
+	 * @return string The template path to use.
+	 */
+	public function maybe_load_gallery_template( $template ) {
+		// Don't interfere if not activated.
+		if ( ! $this->is_activated ) {
+			return $template;
+		}
+
+		// Don't use custom template for block themes - they use pre_render_block.
+		if ( wp_is_block_theme() ) {
+			return $template;
+		}
+
+		// Make renderer available to template via global.
+		global $alg_gallery_renderer;
+		$alg_gallery_renderer = $this->renderer;
+
+		// Return our custom template.
+		return ALG_PLUGIN_DIR . 'templates/gallery-template.php';
 	}
 
 	/**
@@ -166,79 +185,12 @@ class ALG_Archive_Detector {
 	}
 
 	/**
-	 * Replace post content with gallery on first post (classic themes).
-	 *
-	 * @param string $content The post content.
-	 * @return string Modified content.
-	 */
-	public function filter_post_content( $content ) {
-		if ( ! $this->is_activated || ! in_the_loop() ) {
-			return $content;
-		}
-
-		// First post in loop gets the gallery.
-		if ( ! $this->gallery_rendered ) {
-			$this->gallery_rendered = true;
-
-			$output  = $this->renderer->get_gallery_html();
-			$output .= $this->renderer->get_content_containers_html();
-			$output .= $this->renderer->get_posts_without_images_html();
-
-			return $output;
-		}
-
-		// Subsequent posts return empty.
-		return '';
-	}
-
-	/**
-	 * Add CSS classes to posts for hiding (classic themes).
-	 *
-	 * @param string[] $classes Post classes.
-	 * @param string[] $class   Additional classes.
-	 * @param int      $post_id Post ID.
-	 * @return string[] Modified classes.
-	 */
-	public function filter_post_class( $classes, $class, $post_id ) {
-		if ( ! $this->is_activated || ! in_the_loop() ) {
-			return $classes;
-		}
-
-		if ( ! $this->gallery_rendered ) {
-			$classes[] = 'alg-gallery-container';
-		} else {
-			$classes[] = 'alg-hidden-post';
-		}
-
-		return $classes;
-	}
-
-	/**
-	 * Output CSS for classic themes.
-	 *
-	 * @return void
-	 */
-	public function output_inline_css() {
-		?>
-		<style>
-			.alg-hidden-post { display: none !important; }
-			.alg-gallery-container .entry-title,
-			.alg-gallery-container .entry-meta,
-			.alg-gallery-container .post-meta,
-			.alg-gallery-container .entry-footer,
-			.alg-gallery-container .post-thumbnail,
-			.alg-gallery-container > header:first-child { display: none !important; }
-		</style>
-		<?php
-	}
-
-	/**
 	 * Output lightbox overlay in footer.
 	 *
 	 * @return void
 	 */
 	public function output_lightbox() {
-		if ( ! $this->gallery_rendered ) {
+		if ( null === $this->renderer ) {
 			return;
 		}
 
