@@ -156,7 +156,6 @@ class ALG_Archive_Detector {
 
 		$output  = $this->renderer->get_gallery_html();
 		$output .= $this->renderer->get_content_containers_html();
-		$output .= $this->renderer->get_pagination_html();
 
 		return $output;
 	}
@@ -178,7 +177,6 @@ class ALG_Archive_Detector {
 
 			$output  = $this->renderer->get_gallery_html();
 			$output .= $this->renderer->get_content_containers_html();
-			$output .= $this->renderer->get_pagination_html();
 
 			return $output;
 		}

@@ -188,29 +188,6 @@ class ALG_Gallery_Renderer {
 	}
 
 	/**
-	 * Get pagination HTML.
-	 *
-	 * @return string Pagination HTML.
-	 */
-	public function get_pagination_html() {
-		ob_start();
-		?>
-		<nav class="alg-gallery-pagination">
-			<?php
-			the_posts_pagination(
-				array(
-					'mid_size'  => 2,
-					'prev_text' => __( '&laquo; Previous', 'archive-lightbox-gallery' ),
-					'next_text' => __( 'Next &raquo;', 'archive-lightbox-gallery' ),
-				)
-			);
-			?>
-		</nav>
-		<?php
-		return ob_get_clean();
-	}
-
-	/**
 	 * Get lightbox overlay HTML.
 	 *
 	 * @return string Lightbox overlay HTML.
