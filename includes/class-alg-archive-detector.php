@@ -98,19 +98,23 @@ class ALG_Archive_Detector {
 			return;
 		}
 
-		// Filter posts to only those with featured images.
-		$posts_with_images = array_filter(
-			$wp_query->posts,
-			function( $post ) {
-				return has_post_thumbnail( $post->ID );
+		// Separate posts with and without featured images.
+		$posts_with_images    = array();
+		$posts_without_images = array();
+
+		foreach ( $wp_query->posts as $post ) {
+			if ( has_post_thumbnail( $post->ID ) ) {
+				$posts_with_images[] = $post;
+			} else {
+				$posts_without_images[] = $post;
 			}
-		);
+		}
 
 		// Set gallery active for asset loading.
 		ALG_Assets::set_gallery_active( true );
 
-		// Initialize renderer with filtered posts.
-		$this->renderer = new ALG_Gallery_Renderer( $posts_with_images );
+		// Initialize renderer with both sets of posts.
+		$this->renderer = new ALG_Gallery_Renderer( $posts_with_images, $posts_without_images );
 	}
 
 	/**
@@ -156,6 +160,7 @@ class ALG_Archive_Detector {
 
 		$output  = $this->renderer->get_gallery_html();
 		$output .= $this->renderer->get_content_containers_html();
+		$output .= $this->renderer->get_posts_without_images_html();
 
 		return $output;
 	}
@@ -177,6 +182,7 @@ class ALG_Archive_Detector {
 
 			$output  = $this->renderer->get_gallery_html();
 			$output .= $this->renderer->get_content_containers_html();
+			$output .= $this->renderer->get_posts_without_images_html();
 
 			return $output;
 		}

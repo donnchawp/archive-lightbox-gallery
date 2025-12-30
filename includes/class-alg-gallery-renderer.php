@@ -33,13 +33,22 @@ class ALG_Gallery_Renderer {
 	private $posts;
 
 	/**
+	 * Posts without featured images.
+	 *
+	 * @var array
+	 */
+	private $posts_without_images;
+
+	/**
 	 * Constructor.
 	 *
-	 * @param array $posts Posts to render.
+	 * @param array $posts               Posts with featured images.
+	 * @param array $posts_without_images Posts without featured images.
 	 */
-	public function __construct( $posts ) {
-		$this->settings = alg_get_settings();
-		$this->posts    = $posts;
+	public function __construct( $posts, $posts_without_images = array() ) {
+		$this->settings             = alg_get_settings();
+		$this->posts                = $posts;
+		$this->posts_without_images = $posts_without_images;
 	}
 
 	/**
@@ -183,6 +192,55 @@ class ALG_Gallery_Renderer {
 		$output .= '</h2>';
 		$output .= '<div class="alg-post-body">' . wp_kses_post( $content ) . '</div>';
 		$output .= '</div>';
+
+		return $output;
+	}
+
+	/**
+	 * Get HTML for posts without featured images.
+	 *
+	 * @return string Posts without images HTML.
+	 */
+	public function get_posts_without_images_html() {
+		if ( empty( $this->posts_without_images ) ) {
+			return '';
+		}
+
+		$output  = '<div class="alg-posts-without-images">';
+		$output .= '<h2 class="alg-posts-without-images-title">' . esc_html__( 'More Posts', 'archive-lightbox-gallery' ) . '</h2>';
+		$output .= '<ul class="alg-posts-without-images-list">';
+
+		foreach ( $this->posts_without_images as $post ) {
+			$output .= $this->get_post_list_item_html( $post );
+		}
+
+		$output .= '</ul>';
+		$output .= '</div>';
+
+		return $output;
+	}
+
+	/**
+	 * Get HTML for a single post list item (without featured image).
+	 *
+	 * @param WP_Post $post Post object.
+	 * @return string Post list item HTML.
+	 */
+	private function get_post_list_item_html( $post ) {
+		$title     = get_the_title( $post->ID );
+		$permalink = get_permalink( $post->ID );
+		$excerpt   = has_excerpt( $post->ID )
+			? get_the_excerpt( $post->ID )
+			: wp_trim_words( $post->post_content, 25, '&hellip;' );
+
+		$output  = '<li class="alg-post-list-item">';
+		$output .= '<a href="' . esc_url( $permalink ) . '" class="alg-post-list-link">';
+		$output .= '<span class="alg-post-list-title">' . esc_html( $title ) . '</span>';
+		$output .= '</a>';
+		if ( $excerpt ) {
+			$output .= '<p class="alg-post-list-excerpt">' . esc_html( $excerpt ) . '</p>';
+		}
+		$output .= '</li>';
 
 		return $output;
 	}
