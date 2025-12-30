@@ -6,7 +6,7 @@
 
 /* CSS Custom Properties */
 :root {
-	--alg-columns: 3;
+	--alg-columns: 2;
 	--alg-gap: 16px;
 	--alg-max-width: 1200px;
 }
@@ -91,7 +91,7 @@
 /* Responsive Grid */
 @media (max-width: 1024px) {
 	:root {
-		--alg-columns: 3;
+		--alg-columns: 2;
 	}
 }
 

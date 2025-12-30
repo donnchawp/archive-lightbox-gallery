@@ -134,7 +134,7 @@ class ALG_Settings {
 			$columns = absint( $input['columns'] );
 			$sanitized['columns'] = max( 1, min( 6, $columns ) );
 		} else {
-			$sanitized['columns'] = 3;
+			$sanitized['columns'] = 2;
 		}
 
 		return $sanitized;
@@ -260,7 +260,7 @@ class ALG_Settings {
 	 */
 	public function render_columns_field() {
 		$settings = alg_get_settings();
-		$columns  = isset( $settings['columns'] ) ? $settings['columns'] : 3;
+		$columns  = isset( $settings['columns'] ) ? $settings['columns'] : 2;
 		?>
 		<input
 			type="number"

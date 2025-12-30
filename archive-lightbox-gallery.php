@@ -57,7 +57,7 @@ function alg_get_settings() {
 	$defaults = array(
 		'enabled_taxonomies' => array( 'category', 'post_tag' ),
 		'content_mode'       => 'excerpt',
-		'columns'            => 3,
+		'columns'            => 2,
 	);
 
 	$settings = get_option( 'alg_settings', array() );

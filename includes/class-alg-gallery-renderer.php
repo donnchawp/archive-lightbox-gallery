@@ -66,7 +66,7 @@ class ALG_Gallery_Renderer {
 	 * @return int Column count.
 	 */
 	public function get_columns() {
-		return isset( $this->settings['columns'] ) ? (int) $this->settings['columns'] : 3;
+		return isset( $this->settings['columns'] ) ? (int) $this->settings['columns'] : 2;
 	}
 
 	/**

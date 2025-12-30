@@ -62,7 +62,7 @@ class ALG_Assets {
 		}
 
 		$settings = alg_get_settings();
-		$columns  = isset( $settings['columns'] ) ? (int) $settings['columns'] : 3;
+		$columns  = isset( $settings['columns'] ) ? (int) $settings['columns'] : 2;
 
 		// Plugin CSS.
 		wp_enqueue_style(
