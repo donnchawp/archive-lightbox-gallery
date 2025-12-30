@@ -34,44 +34,12 @@ class ALG_Gallery_Renderer {
 
 	/**
 	 * Constructor.
+	 *
+	 * @param array $posts Posts to render.
 	 */
-	public function __construct() {
+	public function __construct( $posts ) {
 		$this->settings = alg_get_settings();
-	}
-
-	/**
-	 * Render the gallery page.
-	 *
-	 * @return void
-	 */
-	public function render() {
-		global $wp_query;
-
-		// Filter posts to only those with featured images.
-		$this->posts = array_filter(
-			$wp_query->posts,
-			function( $post ) {
-				return has_post_thumbnail( $post->ID );
-			}
-		);
-
-		// Load the template.
-		include ALG_PLUGIN_DIR . 'templates/gallery-template.php';
-	}
-
-	/**
-	 * Get the archive title.
-	 *
-	 * @return string Archive title.
-	 */
-	public function get_archive_title() {
-		$queried_object = get_queried_object();
-
-		if ( $queried_object && isset( $queried_object->name ) ) {
-			return $queried_object->name;
-		}
-
-		return __( 'Gallery', 'archive-lightbox-gallery' );
+		$this->posts    = $posts;
 	}
 
 	/**
@@ -108,10 +76,11 @@ class ALG_Gallery_Renderer {
 	 */
 	public function get_gallery_html() {
 		if ( ! $this->has_posts() ) {
-			return '<p>' . esc_html__( 'No posts with featured images found.', 'archive-lightbox-gallery' ) . '</p>';
+			return '<p class="alg-no-posts">' . esc_html__( 'No posts with featured images found.', 'archive-lightbox-gallery' ) . '</p>';
 		}
 
-		$output  = '<figure class="wp-block-gallery has-nested-images columns-' . esc_attr( $this->get_columns() ) . ' is-cropped alg-gallery">';
+		$output  = '<div class="alg-gallery-wrapper">';
+		$output .= '<figure class="wp-block-gallery has-nested-images columns-' . esc_attr( $this->get_columns() ) . ' is-cropped alg-gallery">';
 		$output .= '<ul class="blocks-gallery-grid">';
 
 		$index = 0;
@@ -122,6 +91,7 @@ class ALG_Gallery_Renderer {
 
 		$output .= '</ul>';
 		$output .= '</figure>';
+		$output .= '</div>';
 
 		return $output;
 	}
@@ -215,5 +185,67 @@ class ALG_Gallery_Renderer {
 		$output .= '</div>';
 
 		return $output;
+	}
+
+	/**
+	 * Get pagination HTML.
+	 *
+	 * @return string Pagination HTML.
+	 */
+	public function get_pagination_html() {
+		ob_start();
+		?>
+		<nav class="alg-gallery-pagination">
+			<?php
+			the_posts_pagination(
+				array(
+					'mid_size'  => 2,
+					'prev_text' => __( '&laquo; Previous', 'archive-lightbox-gallery' ),
+					'next_text' => __( 'Next &raquo;', 'archive-lightbox-gallery' ),
+				)
+			);
+			?>
+		</nav>
+		<?php
+		return ob_get_clean();
+	}
+
+	/**
+	 * Get lightbox overlay HTML.
+	 *
+	 * @return string Lightbox overlay HTML.
+	 */
+	public function get_lightbox_overlay_html() {
+		ob_start();
+		?>
+		<!-- Lightbox Overlay -->
+		<div class="alg-lightbox" role="dialog" aria-modal="true" aria-label="<?php esc_attr_e( 'Image lightbox', 'archive-lightbox-gallery' ); ?>" hidden>
+			<div class="alg-lightbox-overlay"></div>
+			<button class="alg-lightbox-close" type="button" aria-label="<?php esc_attr_e( 'Close lightbox', 'archive-lightbox-gallery' ); ?>">
+				<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" aria-hidden="true" focusable="false">
+					<path d="M13 11.8l6.1-6.3-1-1-6.1 6.2-6.1-6.2-1 1 6.1 6.3-6.5 6.7 1 1 6.5-6.6 6.5 6.6 1-1z"></path>
+				</svg>
+			</button>
+			<button class="alg-lightbox-prev" type="button" aria-label="<?php esc_attr_e( 'Previous image', 'archive-lightbox-gallery' ); ?>">
+				<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" aria-hidden="true" focusable="false">
+					<path d="M14.6 7l-1.2-1L8 12l5.4 6 1.2-1-4.6-5z"></path>
+				</svg>
+			</button>
+			<button class="alg-lightbox-next" type="button" aria-label="<?php esc_attr_e( 'Next image', 'archive-lightbox-gallery' ); ?>">
+				<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" aria-hidden="true" focusable="false">
+					<path d="M10.6 6L9.4 7l4.6 5-4.6 5 1.2 1 5.4-6z"></path>
+				</svg>
+			</button>
+			<div class="alg-lightbox-content">
+				<figure class="alg-lightbox-figure">
+					<img class="alg-lightbox-image" src="" alt="" />
+				</figure>
+				<div class="alg-lightbox-info" aria-live="polite">
+					<!-- Post content will be inserted here -->
+				</div>
+			</div>
+		</div>
+		<?php
+		return ob_get_clean();
 	}
 }
